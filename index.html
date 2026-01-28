@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portfolio | IT Student</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f2f4f7;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    nav {
+      margin-top: 20px;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    section {
+      background: white;
+      margin: 20px auto;
+      padding: 30px;
+      max-width: 900px;
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #1e3a8a;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .project {
+      border-left: 4px solid #1e3a8a;
+      padding-left: 15px;
+      margin-bottom: 20px;
+    }
+
+    footer {
+      background: #111827;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Snake Game Styles */
+    .game-container {
+      text-align: center;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .score-board {
+      background-color: #0f380f;
+      color: #9bbc0f;
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    canvas {
+      background-color: #9bbc0f;
+      border: 8px solid #0f380f;
+      border-radius: 5px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      max-width: 100%;
+      height: auto;
+    }
+
+    .mobile-controls {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .control-btn {
+      background-color: #0f380f;
+      color: #9bbc0f;
+      border: 3px solid #9bbc0f;
+      border-radius: 10px;
+      font-size: 2em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.1s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-btn:active {
+      background-color: #9bbc0f;
+      color: #0f380f;
+      transform: scale(0.95);
+    }
+
+    .control-btn.up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .control-btn.left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .control-btn.center {
+      grid-column: 2;
+      grid-row: 2;
+      background-color: #306230;
+      border-color: #0f380f;
+      font-size: 1em;
+      cursor: default;
+    }
+
+    .control-btn.right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .control-btn.down {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .keyboard-controls {
+      margin-top: 20px;
+      color: #9bbc0f;
+      font-size: 0.9em;
+    }
+
+    .keyboard-controls p {
+      margin: 5px 0;
+    }
+
+    #gameOverScreen {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(15, 56, 15, 0.9);
+      color: #9bbc0f;
+      border-radius: 10px;
+      padding: 40px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    #gameOverScreen.show {
+      display: flex;
+    }
+
+    #gameOverScreen h2 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    #gameOverScreen p {
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+
+    .restart-btn {
+      background-color: #9bbc0f;
+      color: #0f380f;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .restart-btn:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+      }
+
+      .mobile-controls {
+        grid-template-columns: repeat(3, 70px);
+        grid-template-rows: repeat(3, 70px);
+      }
+
+      .control-btn {
+        font-size: 1.5em;
+      }
+
+      .keyboard-controls {
+        font-size: 0.8em;
+      }
+
+      #gameOverScreen {
+        padding: 30px;
+      }
+
+      #gameOverScreen h2 {
+        font-size: 2em;
+      }
+
+      #gameOverScreen p {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Nielmar Josh A. Iloreta</h1>
+  <p>IT Student | Aspiring Web Developer</p>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#certifications">Certifications</a>
+    <a href="#activities">Activities</a>
+    <a href="#snake">Snake Game</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="about">
+  <h2>About Me</h2>
+  <p>
+    I am an IT student with a strong interest in creative problem-solving,
+    storytelling, and digital platforms. My background in creative writing
+    has strengthened my communication and analytical skills, while competitive
+    gaming has enhanced my ability to work in teams and adapt under pressure.
+    I aim to continuously improve my technical skills and apply them in
+    real-world IT environments.
+  </p>
+</section>
+
+<section id="skills">
+  <h2>Skills</h2>
+  <ul>
+    <li><strong>Creative Writing & Storytelling</strong> – Writing novel-length narratives, world-building, and character development</li>
+    <li><strong>Critical Thinking & Strategy</strong> – Decision-making and adaptive thinking developed through competitive gaming (DOTA)</li>
+    <li><strong>Team Coordination</strong> – Role-based teamwork and communication in multiplayer environments</li>
+    <li><strong>Time Management</strong> – Meeting long-term writing goals while balancing academic responsibilities</li>
+    <li><strong>Basic Web Development</strong> – HTML, CSS, and JavaScript fundamentals</li>
+  </ul>
+</section>
+
+<section id="projects">
+  <h2>Projects</h2>
+
+  <div class="project">
+    <h3>Personal Portfolio Website</h3>
+    <p>
+      Designed and developed a personal portfolio website using HTML, CSS,
+      and JavaScript to showcase skills, projects, certifications, and
+      extracurricular activities.
+    </p>
+    <p><strong>Technologies:</strong> HTML, CSS, JavaScript</p>
+  </div>
+
+  <div class="project">
+    <h3>Creative Writing Project</h3>
+    <p>
+      Authored an original novel-length story focusing on narrative structure,
+      pacing, thematic consistency, and revision workflows.
+    </p>
+    <p><strong>Skills Applied:</strong> Writing, planning, creativity, self-editing</p>
+  </div>
+</section>
+
+<section id="certifications">
+  <h2>Certifications</h2>
+  <ul>
+    <li>Introduction to Web Development – Self-Study / Online Learning</li>
+    <li>HTML & CSS Basics – Practice-Based Learning (In Progress)</li>
+  </ul>
+</section>
+
+<section id="activities">
+  <h2>Extracurricular Activities</h2>
+  <ul>
+    <li>Competitive Online Gaming (DOTA) – Teamwork, leadership, and strategic planning</li>
+    <li>Independent Creative Writing – Continuous practice of long-form writing and revision</li>
+  </ul>
+</section>
+
+<!-- SNAKE GAME SECTION (Code untouched) -->
+<section id="snake">
+  <h2>Snake Game</h2>
+  <div class="game-container">
+    <h1>🐍 SNAKE</h1>
+    <div class="score-board">
+      Score: <span id="score">0</span>
+    </div>
+    <div style="position: relative;">
+      <canvas id="gameCanvas" width="500" height="500"></canvas>
+      <div id="gameOverScreen">
+        <h2>GAME OVER!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button class="restart-btn" onclick="restartGame()">PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <!-- Mobile Control Buttons -->
+    <div class="mobile-controls">
+      <button class="control-btn up" id="btnUp">▲</button>
+      <button class="control-btn left" id="btnLeft">◄</button>
+      <div class="control-btn center">🐍</div>
+      <button class="control-btn right" id="btnRight">►</button>
+      <button class="control-btn down" id="btnDown">▼</button>
+    </div>
+
+    <div class="keyboard-controls">
+      <p><strong>Desktop:</strong> Arrow Keys or WASD</p>
+      <p><strong>Mobile:</strong> Use buttons above</p>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <h2>Contact</h2>
+  <p>Email: your.email@example.com</p>
+  <p>
+    GitHub: <a href="#">github.com/yourusername</a> |
+    LinkedIn: <a href="#">linkedin.com/in/yourname</a>
+  </p>
+</footer>
+
+<script>
+  // Simple smooth scrolling for navigation
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelector(this.getAttribute('href'))
+        .scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+<!-- SNAKE GAME SCRIPT (UNCHANGED) -->
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreElement = document.getElementById('score');
+  const finalScoreElement = document.getElementById('finalScore');
+  const gameOverScreen = document.getElementById('gameOverScreen');
+
+  const TILE_SIZE = 20;
+  const GRID_WIDTH = 25;
+  const GRID_HEIGHT = 25;
+  const GAME_SPEED = 100;
+
+  let snake = [];
+  let food = {};
+  let direction = 'RIGHT';
+  let nextDirection = 'RIGHT';
+  let running = false;
+  let gameOver = false;
+  let score = 0;
+  let gameLoop = null;
+
+  function init() {
+      canvas.width = GRID_WIDTH * TILE_SIZE;
+      canvas.height = GRID_HEIGHT * TILE_SIZE;
+      setupMobileControls();
+      startGame();
+  }
+
+  function setupMobileControls() {
+      const btnUp = document.getElementById('btnUp');
+      const btnDown = document.getElementById('btnDown');
+      const btnLeft = document.getElementById('btnLeft');
+      const btnRight = document.getElementById('btnRight');
+
+      [btnUp, btnDown, btnLeft, btnRight].forEach(btn => {
+          btn.addEventListener('touchstart', (e) => e.preventDefault());
+      });
+
+      btnUp.addEventListener('click', () => {
+          if (running && direction !== 'DOWN') nextDirection = 'UP';
+      });
+
+      btnDown.addEventListener('click', () => {
+          if (running && direction !== 'UP') nextDirection = 'DOWN';
+      });
+
+      btnLeft.addEventListener('click', () => {
+          if (running && direction !== 'RIGHT') nextDirection = 'LEFT';
+      });
+
+      btnRight.addEventListener('click', () => {
+          if (running && direction !== 'LEFT') nextDirection = 'RIGHT';
+      });
+
+      btnUp.addEventListener('touchstart', (e) => {
+          if (running && direction !== 'DOWN') nextDirection = 'UP';
+      });
+
+      btnDown.addEventListener('touchstart', (e) => {
+          if (running && direction !== 'UP') nextDirection = 'DOWN';
+      });
+
+      btnLeft.addEventListener('touchstart', (e) => {
+          if (running && direction !== 'RIGHT') nextDirection = 'LEFT';
+      });
+
+      btnRight.addEventListener('touchstart', (e) => {
+          if (running && direction !== 'LEFT') nextDirection = 'RIGHT';
+      });
+  }
+
+  function startGame() {
+      snake = [
+          { x: 5, y: 5 },
+          { x: 4, y: 5 },
+          { x: 3, y: 5 }
+      ];
+      
+      direction = 'RIGHT';
+      nextDirection = 'RIGHT';
+      score = 0;
+      gameOver = false;
+      running = true;
+      
+      updateScore();
+      gameOverScreen.classList.remove('show');
+      spawnFood();
+      
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(update, GAME_SPEED);
+  }
+
+  function spawnFood() {
+      let validPosition = false;
+      while (!validPosition) {
+          food = {
+              x: Math.floor(Math.random() * GRID_WIDTH),
+              y: Math.floor(Math.random() * GRID_HEIGHT)
+          };
+          validPosition = !snake.some(segment => 
+              segment.x === food.x && segment.y === food.y
+          );
+      }
+  }
+
+  function update() {
+      if (!running) return;
+
+      direction = nextDirection;
+      const head = { ...snake[0] };
+
+      switch (direction) {
+          case 'UP': head.y--; break;
+          case 'DOWN': head.y++; break;
+          case 'LEFT': head.x--; break;
+          case 'RIGHT': head.x++; break;
+      }
+
+      if (head.x < 0 || head.x >= GRID_WIDTH || 
+          head.y < 0 || head.y >= GRID_HEIGHT) {
+          endGame();
+          return;
+      }
+
+      if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+          endGame();
+          return;
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y) {
+          score += 10;
+          updateScore();
+          spawnFood();
+      } else {
+          snake.pop();
+      }
+
+      draw();
+  }
+
+  function draw() {
+      ctx.fillStyle = '#9bbc0f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#306230';
+      ctx.fillRect(
+          food.x * TILE_SIZE,
+          food.y * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE
+      );
+
+      snake.forEach((segment, index) => {
+          ctx.fillStyle = index === 0 ? '#0f380f' : '#306230';
+          ctx.fillRect(
+              segment.x * TILE_SIZE,
+              segment.y * TILE_SIZE,
+              TILE_SIZE,
+              TILE_SIZE
+          );
+      });
+  }
+
+  function endGame() {
+      running = false;
+      gameOver = true;
+      clearInterval(gameLoop);
+      finalScoreElement.textContent = score;
+      gameOverScreen.classList.add('show');
+  }
+
+  function updateScore() {
+      scoreElement.textContent = score;
+  }
+
+  function restartGame() {
+      startGame();
+  }
+
+  document.addEventListener('keydown', (e) => {
+      if (gameOver && e.code === 'Space') {
+          restartGame();
+          return;
+      }
+
+      if (!running) return;
+
+      switch (e.key) {
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+              if (direction !== 'DOWN') nextDirection = 'UP';
+              e.preventDefault();
+              break;
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+              if (direction !== 'UP') nextDirection = 'DOWN';
+              e.preventDefault();
+              break;
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+              if (direction !== 'RIGHT') nextDirection = 'LEFT';
+              e.preventDefault();
+              break;
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+              if (direction !== 'LEFT') nextDirection = 'RIGHT';
+              e.preventDefault();
+              break;
+      }
+  });
+
+  init();
+</script>
+
+</body>
+</html>
