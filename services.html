@@ -1,29 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Services</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <title>Services - Bacoor City LGU</title>
+  <style>
+    /* ===== General CSS ===== */
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f7;
+      color: #222;
+    }
+
+    header {
+      background: #0a3d62;
+      padding: 15px 20px;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    nav a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    nav a:hover {
+      background: #07304e;
+    }
+
+    nav a.active {
+      background: #ffffff;
+      color: #0a3d62;
+    }
+
+    .container {
+      padding: 25px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #0a3d62;
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 15px;
+      margin: 12px 0;
+      border-radius: 6px;
+      border-left: 5px solid #0a3d62;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .card:hover {
+      background: #eef4f8;
+    }
+  </style>
 </head>
 <body>
 
-<header><nav><a href="index.html">Home</a></nav></header>
+<header>
+  <nav>
+    <a href="index.html" id="home">Home</a>
+    <a href="departments.html" id="departments">Departments</a>
+    <a href="services.html" id="services">Services</a>
+    <a href="announcements.html" id="announcements">Announcements</a>
+    <a href="contact.html" id="contact">Contact</a>
+  </nav>
+</header>
 
 <div class="container">
-  <h1>Online Services</h1>
-  <form id="serviceForm">
-    <label>Service</label>
-    <select id="service"></select>
-
-    <label>Name</label>
-    <input id="name" required>
-
-    <button type="submit">Submit</button>
-  </form>
-
-  <p id="message"></p>
+  <h1>Services</h1>
+  
+  <div class="card">Business Permits & Licensing</div>
+  <div class="card">Healthcare Services</div>
+  <div class="card">Education & Training Programs</div>
+  <div class="card">Social Welfare Assistance</div>
+  <div class="card">Environmental Services</div>
+  <div class="card">Public Works Requests</div>
 </div>
 
-<script src="assets/js/data.js"></script>
-<script src="assets/js/services.js"></script>
+<script>
+  // ===== Highlight active nav link =====
+  const currentPage = window.location.pathname.split("/").pop();
+  const navLinks = document.querySelectorAll("nav a");
+
+  navLinks.forEach(link => {
+    if(link.getAttribute("href") === currentPage) {
+      link.classList.add("active");
+    }
+  });
+</script>
+
 </body>
 </html>
+
