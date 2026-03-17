@@ -1,106 +1,37 @@
-{
-  "scrape_info": {
-    "timestamp": "2024-01-15T10:30:00",
-    "total_games": 12,
-    "source_url": "https://www.xbox.com/en-us/games/all-games",
-    "scraper_version": "1.0"
-  },
-  "games": [
-    {
-      "game_title": "Starfield",
-      "release_date": "September 6, 2023",
-      "key_features": "Space exploration, RPG, Open world, Character customization, Multiple endings",
-      "platform_availability": "Xbox Series X|S, PC",
-      "developer_information": "Bethesda Game Studios",
-      "publisher_information": "Bethesda Softworks"
-    },
-    {
-      "game_title": "Forza Motorsport",
-      "release_date": "October 10, 2023",
-      "key_features": "Racing, Simulation, Multiplayer, Realistic graphics, Car customization",
-      "platform_availability": "Xbox Series X|S, PC",
-      "developer_information": "Turn 10 Studios",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Halo Infinite",
-      "release_date": "December 8, 2021",
-      "key_features": "FPS, Multiplayer, Campaign, Battle pass, Split-screen co-op",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "343 Industries",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Gears 5",
-      "release_date": "September 10, 2019",
-      "key_features": "Third-person shooter, Co-op, Horde mode, Multiplayer, Campaign",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "The Coalition",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Sea of Thieves",
-      "release_date": "March 20, 2018",
-      "key_features": "Pirate adventure, Multiplayer, Co-op, Open world, Ship combat",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "Rare",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Microsoft Flight Simulator",
-      "release_date": "August 18, 2020",
-      "key_features": "Flight simulation, Realistic, Open world, Multiplayer, Real-time weather",
-      "platform_availability": "Xbox Series X|S, PC",
-      "developer_information": "Asobo Studio",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Psychonauts 2",
-      "release_date": "August 25, 2021",
-      "key_features": "Platformer, Adventure, Comedy, Puzzle, Mind-bending levels",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "Double Fine Productions",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Grounded",
-      "release_date": "September 27, 2022",
-      "key_features": "Survival, Co-op, Open world, Crafting, Base building",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "Obsidian Entertainment",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Pentiment",
-      "release_date": "November 15, 2022",
-      "key_features": "Historical, Narrative, Mystery, Choice-driven, Hand-drawn art",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "Obsidian Entertainment",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Hi-Fi Rush",
-      "release_date": "January 25, 2023",
-      "key_features": "Rhythm action, Combat, Stylish, Music-based, Cel-shaded graphics",
-      "platform_availability": "Xbox Series X|S, PC",
-      "developer_information": "Tango Gameworks",
-      "publisher_information": "Bethesda Softworks"
-    },
-    {
-      "game_title": "Age of Empires IV",
-      "release_date": "October 28, 2021",
-      "key_features": "RTS, Historical, Multiplayer, Campaign, Civilization building",
-      "platform_availability": "Xbox Series X|S, PC",
-      "developer_information": "Relic Entertainment",
-      "publisher_information": "Xbox Game Studios"
-    },
-    {
-      "game_title": "Forza Horizon 5",
-      "release_date": "November 9, 2021",
-      "key_features": "Racing, Open world, Arcade, Multiplayer, Seasonal events",
-      "platform_availability": "Xbox One, Xbox Series X|S, PC",
-      "developer_information": "Playground Games",
-      "publisher_information": "Xbox Game Studios"
-    }
-  ]
+import requests
+from bs4 import BeautifulSoup
+import json
+
+url = "https://www.xbox.com/en-US/games"
+
+headers = {
+    "User-Agent": "Mozilla/5.0"
 }
+
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, "html.parser")
+
+games = []
+
+cards = soup.select("a")
+
+for card in cards:
+    
+    title = card.get_text(strip=True)
+    link = card.get("href")
+
+    if title and "/games/" in str(link):
+
+        games.append({
+            "title": title,
+            "link": "https://www.xbox.com" + link if link.startswith("/") else link
+        })
+
+data = {
+    "games": games
+}
+
+with open("data.json","w",encoding="utf-8") as f:
+    json.dump(data,f,indent=4)
+
+print("data.json created with", len(games), "games")
