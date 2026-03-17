@@ -1,39 +1,56 @@
-// Xbox Game Data - Loaded from data.json
+// Xbox Game Pass Scraper Frontend
 let gamesData = [];
 let filteredGames = [];
+let currentFilter = 'all';
 
-// Initialize the page
+// Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded, loading games from data.json...');
+    console.log('🎮 Xbox Game Pass Explorer initialized');
     loadGames();
-    
-    // Add enter key support for search
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
+    setupEventListeners();
+});
+
+// Setup event listeners
+function setupEventListeners() {
+    // Search input with debounce
+    const searchInput = document.getElementById('searchInput');
+    let debounceTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
             searchGames();
+        }, 300);
+    });
+
+    // Mobile menu toggle
+    document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('show');
+    });
+
+    // Clear search button visibility
+    searchInput.addEventListener('input', function() {
+        const clearBtn = document.getElementById('clearSearch');
+        if (this.value.length > 0) {
+            clearBtn.style.display = 'flex';
+        } else {
+            clearBtn.style.display = 'none';
         }
     });
-    
-    // Add keyboard shortcut for search (Ctrl+K or Cmd+K)
+
+    // Keyboard shortcut (Ctrl+K)
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
-            document.getElementById('searchInput').focus();
+            searchInput.focus();
         }
     });
-});
+}
 
-// Load games from JSON file
+// Load games from data.json
 async function loadGames() {
+    showLoading();
+    
     try {
-        // Show loading state
-        document.getElementById('gamesGrid').innerHTML = `
-            <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i> Loading games from data.json...
-            </div>
-        `;
-        
-        // Fetch the JSON file
         const response = await fetch('data.json');
         
         if (!response.ok) {
@@ -48,39 +65,21 @@ async function loadGames() {
         } else if (Array.isArray(data)) {
             gamesData = data;
         } else {
-            console.error('Unexpected JSON format:', data);
             gamesData = [];
         }
         
         console.log(`✅ Loaded ${gamesData.length} games from data.json`);
         
-        // Initialize filtered games
         filteredGames = [...gamesData];
-        
-        // Update UI
-        displayGames(filteredGames);
-        updateStats();
-        updateGameCount();
-        
-        // Update last updated time
-        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-        
-        // Show success notification
-        showNotification(`✅ Loaded ${gamesData.length} games successfully!`, 'success');
+        updateAll();
+        showNotification(`Loaded ${gamesData.length} games successfully`, 'success');
         
     } catch (error) {
-        console.error('❌ Error loading games:', error);
-        document.getElementById('gamesGrid').innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Error Loading Games</h3>
-                <p>Could not load data.json file. Make sure the file exists in the same folder as index.html.</p>
-                <p class="error-detail">${error.message}</p>
-                <button onclick="loadSampleData()" class="retry-btn">
-                    <i class="fas fa-redo"></i> Load Sample Data
-                </button>
-            </div>
-        `;
+        console.error('Error loading games:', error);
+        showNotification('Failed to load data.json. Make sure the file exists.', 'error');
+        
+        // Load sample data as fallback
+        loadSampleData();
     }
 }
 
@@ -88,137 +87,140 @@ async function loadGames() {
 function loadSampleData() {
     gamesData = [
         {
-            "game_title": "Starfield",
-            "release_date": "September 6, 2023",
-            "key_features": "Space exploration, RPG, Open world, Character customization",
-            "platform_availability": "Xbox Series X|S, PC",
-            "developer_information": "Bethesda Game Studios",
-            "publisher_information": "Bethesda Softworks"
+            "game_title": "Forza Horizon 6",
+            "release_date": "Not Available",
+            "key_features": "Discover the breathtaking landscapes of Japan in over 550 real-world cars and become a racing Legend in Forza Horizon's biggest open world driving adventure yet.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Not Available",
+            "publisher_information": "Not Available"
         },
         {
-            "game_title": "Forza Motorsport",
-            "release_date": "October 10, 2023",
-            "key_features": "Racing, Simulation, Multiplayer, Realistic graphics",
-            "platform_availability": "Xbox Series X|S, PC",
-            "developer_information": "Turn 10 Studios",
-            "publisher_information": "Xbox Game Studios"
-        },
-        {
-            "game_title": "Halo Infinite",
-            "release_date": "December 8, 2021",
-            "key_features": "FPS, Multiplayer, Campaign, Battle pass",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
-            "developer_information": "343 Industries",
-            "publisher_information": "Xbox Game Studios"
-        },
-        {
-            "game_title": "Gears 5",
-            "release_date": "September 10, 2019",
-            "key_features": "Third-person shooter, Co-op, Horde mode, Multiplayer",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
-            "developer_information": "The Coalition",
-            "publisher_information": "Xbox Game Studios"
-        },
-        {
-            "game_title": "Sea of Thieves",
-            "release_date": "March 20, 2018",
-            "key_features": "Pirate adventure, Multiplayer, Co-op, Open world",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
-            "developer_information": "Rare",
-            "publisher_information": "Xbox Game Studios"
-        },
-        {
-            "game_title": "Microsoft Flight Simulator",
-            "release_date": "August 18, 2020",
-            "key_features": "Flight simulation, Realistic, Open world, Multiplayer",
-            "platform_availability": "Xbox Series X|S, PC",
-            "developer_information": "Asobo Studio",
-            "publisher_information": "Xbox Game Studios"
-        },
-        {
-            "game_title": "Psychonauts 2",
-            "release_date": "August 25, 2021",
-            "key_features": "Platformer, Adventure, Comedy, Puzzle",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
+            "game_title": "Kiln",
+            "release_date": "Not Available",
+            "key_features": "An online multiplayer pottery party brawler from Double Fine Productions. Assemble a team, sculpt pots on a pottery wheel, and team up to douse the enemy's kiln!",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
             "developer_information": "Double Fine Productions",
+            "publisher_information": "Not Available"
+        },
+        {
+            "game_title": "Fable",
+            "release_date": "Not Available",
+            "key_features": "Become the Hero you want to be in an immersive open world where each choice shapes your journey, reputation is everything, and fairytale endings are never guaranteed.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Playground Games",
             "publisher_information": "Xbox Game Studios"
         },
         {
-            "game_title": "Grounded",
-            "release_date": "September 27, 2022",
-            "key_features": "Survival, Co-op, Open world, Crafting",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
-            "developer_information": "Obsidian Entertainment",
-            "publisher_information": "Xbox Game Studios"
+            "game_title": "Beast of Reincarnation",
+            "release_date": "Not Available",
+            "key_features": "Explore what it means to be human in Beast of Reincarnation, an expansive one-person, one-dog action RPG built around demanding, technical combat.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Not Available",
+            "publisher_information": "Not Available"
         },
         {
-            "game_title": "Pentiment",
-            "release_date": "November 15, 2022",
-            "key_features": "Historical, Narrative, Mystery, Choice-driven",
-            "platform_availability": "Xbox One, Xbox Series X|S, PC",
-            "developer_information": "Obsidian Entertainment",
-            "publisher_information": "Xbox Game Studios"
+            "game_title": "Mixtape",
+            "release_date": "Not Available",
+            "key_features": "On their last night together, three friends embark on one final adventure. Play through a mixtape of memories, set to the soundtrack of a generation.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Not Available",
+            "publisher_information": "Not Available"
         },
         {
-            "game_title": "Hi-Fi Rush",
-            "release_date": "January 25, 2023",
-            "key_features": "Rhythm action, Combat, Stylish, Music-based",
-            "platform_availability": "Xbox Series X|S, PC",
-            "developer_information": "Tango Gameworks",
-            "publisher_information": "Bethesda Softworks"
+            "game_title": "Fortnite Crew",
+            "release_date": "Not Available",
+            "key_features": "Get access to the current Battle Pass, OG Pass, LEGO Pass, Music Pass, and Rocket Pass Premium. In addition, get 1,000 V-Bucks each month.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Epic Games",
+            "publisher_information": "Epic Games"
+        },
+        {
+            "game_title": "Cyberpunk 2077",
+            "release_date": "Not Available",
+            "key_features": "Play Cyberpunk 2077 with Xbox Game Pass Premium and Ultimate.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "CD Projekt Red",
+            "publisher_information": "CD Projekt"
+        },
+        {
+            "game_title": "Hollow Knight: Silksong",
+            "release_date": "Not Available",
+            "key_features": "Play Hollow Knight: Silksong with Xbox Game Pass Premium and Ultimate.",
+            "platform_availability": "Xbox Console, PC, Cloud Gaming",
+            "developer_information": "Team Cherry",
+            "publisher_information": "Not Available"
         }
     ];
     
     filteredGames = [...gamesData];
-    displayGames(filteredGames);
+    updateAll();
+    showNotification('Loaded sample data (data.json not found)', 'warning');
+}
+
+// Update all UI components
+function updateAll() {
+    displayGames();
     updateStats();
-    updateGameCount();
-    showNotification('📋 Loaded sample data successfully!', 'info');
+    updateHeroStats();
+    updateResultCount();
+    updateLastUpdated();
 }
 
 // Display games in the grid
-function displayGames(games) {
+function displayGames() {
     const gamesGrid = document.getElementById('gamesGrid');
     const noResults = document.getElementById('noResults');
     
-    if (games.length === 0) {
+    if (filteredGames.length === 0) {
         gamesGrid.innerHTML = '';
-        noResults.style.display = 'block';
+        noResults.style.display = 'flex';
         return;
     }
     
     noResults.style.display = 'none';
     
     let html = '';
-    games.forEach((game, index) => {
+    filteredGames.forEach((game, index) => {
+        // Check if fields are available
+        const title = game.game_title || 'Not Available';
+        const releaseDate = game.release_date || 'Not Available';
+        const features = game.key_features || 'Not Available';
+        const platforms = game.platform_availability || 'Not Available';
+        const developer = game.developer_information || 'Not Available';
+        const publisher = game.publisher_information || 'Not Available';
+        
+        // Platform icons
+        const hasXbox = platforms.toLowerCase().includes('xbox');
+        const hasPC = platforms.toLowerCase().includes('pc');
+        const hasCloud = platforms.toLowerCase().includes('cloud');
+        
         html += `
             <div class="game-card" style="animation-delay: ${index * 0.05}s">
-                <div class="game-header">
-                    <h3 class="game-title">${game.game_title || 'Not Available'}</h3>
-                    <span class="release-badge">
-                        <i class="fas fa-calendar-alt"></i> ${game.release_date || 'Not Available'}
+                <div class="game-card-header">
+                    <h3 class="game-title">${escapeHtml(title)}</h3>
+                    <div class="platform-icons">
+                        ${hasXbox ? '<i class="fa-brands fa-xbox" title="Xbox"></i>' : ''}
+                        ${hasPC ? '<i class="fas fa-desktop" title="PC"></i>' : ''}
+                        ${hasCloud ? '<i class="fas fa-cloud" title="Cloud Gaming"></i>' : ''}
+                    </div>
+                </div>
+                
+                <div class="game-badges">
+                    <span class="badge ${releaseDate === 'Not Available' ? 'badge-missing' : 'badge-date'}">
+                        <i class="fas fa-calendar-alt"></i> ${releaseDate}
                     </span>
                 </div>
                 
+                <p class="game-description">${escapeHtml(features)}</p>
+                
                 <div class="game-details">
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="fas fa-star"></i> Features:</span>
-                        <span class="detail-value">${game.key_features || 'Not Available'}</span>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="fas fa-tv"></i> Platforms:</span>
-                        <span class="detail-value">${game.platform_availability || 'Not Available'}</span>
-                    </div>
-                    
-                    <div class="detail-item">
+                    <div class="detail-row">
                         <span class="detail-label"><i class="fas fa-code"></i> Developer:</span>
-                        <span class="detail-value">${game.developer_information || 'Not Available'}</span>
+                        <span class="detail-value ${developer === 'Not Available' ? 'missing' : ''}">${escapeHtml(developer)}</span>
                     </div>
-                    
-                    <div class="detail-item">
+                    <div class="detail-row">
                         <span class="detail-label"><i class="fas fa-building"></i> Publisher:</span>
-                        <span class="detail-value">${game.publisher_information || 'Not Available'}</span>
+                        <span class="detail-value ${publisher === 'Not Available' ? 'missing' : ''}">${escapeHtml(publisher)}</span>
                     </div>
                 </div>
             </div>
@@ -228,152 +230,277 @@ function displayGames(games) {
     gamesGrid.innerHTML = html;
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Update statistics
 function updateStats() {
-    const statsSection = document.getElementById('statsSection');
+    const statsGrid = document.getElementById('statsGrid');
     
     const totalGames = gamesData.length;
-    const withReleaseDates = gamesData.filter(g => g.release_date && g.release_date !== 'Not Available').length;
-    const withDevelopers = gamesData.filter(g => g.developer_information && g.developer_information !== 'Not Available').length;
-    const withPublishers = gamesData.filter(g => g.publisher_information && g.publisher_information !== 'Not Available').length;
+    const withRelease = gamesData.filter(g => g.release_date && g.release_date !== 'Not Available').length;
+    const withDeveloper = gamesData.filter(g => g.developer_information && g.developer_information !== 'Not Available').length;
+    const withPublisher = gamesData.filter(g => g.publisher_information && g.publisher_information !== 'Not Available').length;
+    const xboxGames = gamesData.filter(g => g.platform_availability && g.platform_availability.toLowerCase().includes('xbox')).length;
+    const cloudGames = gamesData.filter(g => g.platform_availability && g.platform_availability.toLowerCase().includes('cloud')).length;
     
-    statsSection.innerHTML = `
+    statsGrid.innerHTML = `
         <div class="stat-card">
-            <i class="fas fa-database stat-icon"></i>
-            <span class="stat-label">Total Games</span>
-            <span class="stat-value">${totalGames}</span>
+            <div class="stat-icon"><i class="fas fa-database"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${totalGames}</span>
+                <span class="stat-label">Total Games</span>
+            </div>
         </div>
         <div class="stat-card">
-            <i class="fas fa-calendar stat-icon"></i>
-            <span class="stat-label">With Release Dates</span>
-            <span class="stat-value">${withReleaseDates}</span>
+            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${withRelease}</span>
+                <span class="stat-label">Release Dates</span>
+            </div>
         </div>
         <div class="stat-card">
-            <i class="fas fa-code stat-icon"></i>
-            <span class="stat-label">With Developers</span>
-            <span class="stat-value">${withDevelopers}</span>
+            <div class="stat-icon"><i class="fas fa-code"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${withDeveloper}</span>
+                <span class="stat-label">Known Developers</span>
+            </div>
         </div>
         <div class="stat-card">
-            <i class="fas fa-building stat-icon"></i>
-            <span class="stat-label">With Publishers</span>
-            <span class="stat-value">${withPublishers}</span>
+            <div class="stat-icon"><i class="fas fa-building"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${withPublisher}</span>
+                <span class="stat-label">Known Publishers</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-brands fa-xbox"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${xboxGames}</span>
+                <span class="stat-label">Xbox Games</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-cloud"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">${cloudGames}</span>
+                <span class="stat-label">Cloud Gaming</span>
+            </div>
         </div>
     `;
 }
 
-// Update game count
-function updateGameCount() {
-    const gameCount = document.getElementById('gameCount');
+// Update hero stats
+function updateHeroStats() {
+    document.getElementById('totalGamesHero').textContent = gamesData.length;
+    document.getElementById('availableNow').textContent = gamesData.filter(g => 
+        g.release_date && g.release_date !== 'Not Available'
+    ).length;
+}
+
+// Update result count
+function updateResultCount() {
+    const resultCount = document.getElementById('resultCount');
     if (filteredGames.length === gamesData.length) {
-        gameCount.innerHTML = `<i class="fas fa-gamepad"></i> ${gamesData.length} Games`;
+        resultCount.innerHTML = `<i class="fas fa-layer-group"></i> ${filteredGames.length} games`;
     } else {
-        gameCount.innerHTML = `<i class="fas fa-filter"></i> ${filteredGames.length}/${gamesData.length} Games`;
+        resultCount.innerHTML = `<i class="fas fa-filter"></i> ${filteredGames.length}/${gamesData.length} games`;
     }
 }
 
-// Search functionality
+// Update last updated time
+function updateLastUpdated() {
+    const now = new Date();
+    const timeString = now.toLocaleString('en-US', { 
+        hour: 'numeric', 
+        minute: 'numeric',
+        hour12: true 
+    });
+    document.getElementById('footerLastUpdated').textContent = `Today at ${timeString}`;
+    document.getElementById('lastUpdatedHero').textContent = timeString;
+}
+
+// Search games
 function searchGames() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     
     if (searchTerm === '') {
-        filteredGames = [...gamesData];
+        applyFilter(currentFilter);
     } else {
         filteredGames = gamesData.filter(game => {
             return (game.game_title && game.game_title.toLowerCase().includes(searchTerm)) ||
                    (game.key_features && game.key_features.toLowerCase().includes(searchTerm)) ||
                    (game.developer_information && game.developer_information.toLowerCase().includes(searchTerm)) ||
-                   (game.publisher_information && game.publisher_information.toLowerCase().includes(searchTerm)) ||
-                   (game.platform_availability && game.platform_availability.toLowerCase().includes(searchTerm));
+                   (game.publisher_information && game.publisher_information.toLowerCase().includes(searchTerm));
         });
     }
     
-    displayGames(filteredGames);
-    updateGameCount();
+    displayGames();
+    updateResultCount();
+}
+
+// Filter games
+function filterGames(filter) {
+    currentFilter = filter;
     
-    if (filteredGames.length === 0) {
-        showNotification('🔍 No games found matching your search', 'info');
-    } else {
-        showNotification(`🔍 Found ${filteredGames.length} games`, 'success');
+    // Update active tab
+    document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    applyFilter(filter);
+}
+
+// Apply current filter
+function applyFilter(filter) {
+    switch(filter) {
+        case 'all':
+            filteredGames = [...gamesData];
+            break;
+        case 'available':
+            filteredGames = gamesData.filter(g => g.release_date && g.release_date !== 'Not Available');
+            break;
+        case 'xbox':
+            filteredGames = gamesData.filter(g => 
+                g.platform_availability && g.platform_availability.toLowerCase().includes('xbox')
+            );
+            break;
+        case 'pc':
+            filteredGames = gamesData.filter(g => 
+                g.platform_availability && g.platform_availability.toLowerCase().includes('pc')
+            );
+            break;
+        case 'cloud':
+            filteredGames = gamesData.filter(g => 
+                g.platform_availability && g.platform_availability.toLowerCase().includes('cloud')
+            );
+            break;
+        default:
+            filteredGames = [...gamesData];
     }
+    
+    displayGames();
+    updateResultCount();
 }
 
 // Reset all filters
 function resetFilters() {
     document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearch').style.display = 'none';
+    currentFilter = 'all';
+    
+    // Update active tab
+    document.querySelectorAll('.filter-tab').forEach((tab, index) => {
+        if (index === 0) tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
+    
     filteredGames = [...gamesData];
-    displayGames(filteredGames);
-    updateGameCount();
-    showNotification('✅ Filters reset', 'info');
+    displayGames();
+    updateResultCount();
+    showNotification('Filters reset', 'info');
+}
+
+// Clear search
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearch').style.display = 'none';
+    searchGames();
+}
+
+// Refresh data (reload from JSON)
+function refreshData() {
+    showNotification('Refreshing data...', 'info');
+    loadGames();
+}
+
+// Show loading state
+function showLoading() {
+    document.getElementById('gamesGrid').innerHTML = `
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading your game collection...</p>
+        </div>
+    `;
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('notificationContainer');
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    notification.innerHTML = `
+        <i class="fas ${icons[type]}"></i>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 // Export to CSV
 function exportToCSV() {
     if (gamesData.length === 0) {
-        showNotification('❌ No data to export', 'error');
+        showNotification('No data to export', 'error');
         return;
     }
 
-    // Create CSV content
     const headers = ['Game Title', 'Release Date', 'Key Features', 'Platforms', 'Developer', 'Publisher'];
     const csvRows = [];
     
-    // Add headers
     csvRows.push(headers.join(','));
     
-    // Add data rows
     gamesData.forEach(game => {
         const row = [
-            `"${game.game_title || 'Not Available'}"`,
-            `"${game.release_date || 'Not Available'}"`,
-            `"${game.key_features || 'Not Available'}"`,
-            `"${game.platform_availability || 'Not Available'}"`,
-            `"${game.developer_information || 'Not Available'}"`,
-            `"${game.publisher_information || 'Not Available'}"`
+            `"${(game.game_title || 'Not Available').replace(/"/g, '""')}"`,
+            `"${(game.release_date || 'Not Available').replace(/"/g, '""')}"`,
+            `"${(game.key_features || 'Not Available').replace(/"/g, '""')}"`,
+            `"${(game.platform_availability || 'Not Available').replace(/"/g, '""')}"`,
+            `"${(game.developer_information || 'Not Available').replace(/"/g, '""')}"`,
+            `"${(game.publisher_information || 'Not Available').replace(/"/g, '""')}"`
         ];
         csvRows.push(row.join(','));
     });
     
-    // Create and download CSV file
     const csvContent = csvRows.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `xbox_games_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `xbox_gamepass_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    showNotification('📥 CSV file downloaded successfully!', 'success');
+    showNotification('CSV exported successfully!', 'success');
 }
 
-// Show notification
-function showNotification(message, type) {
-    // Remove existing notification
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-    
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = message;
-    
-    // Add to body
-    document.body.appendChild(notification);
-    
-    // Show notification
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
+// Add export button to panel
+document.addEventListener('DOMContentLoaded', function() {
+    const panelActions = document.querySelector('.panel-actions');
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'btn-export';
+    exportBtn.innerHTML = '<i class="fas fa-download"></i> Export CSV';
+    exportBtn.onclick = exportToCSV;
+    panelActions.appendChild(exportBtn);
+});``
 }
